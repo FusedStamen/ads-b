@@ -1,0 +1,30 @@
+[Unit]
+Description=ADS-B unique ICAO logger (WatchDogsGo format)
+After=dump1090-fa.service
+Wants=dump1090-fa.service
+
+[Service]
+Type=simple
+User=adsblog
+# Optional station position for best-range tracking, e.g.
+#   LOGGER_ARGS="--lat 12.345678 --lon -98.765432"
+EnvironmentFile=-/etc/default/adsb-zero
+ExecStart=/usr/bin/python3 /opt/adsb-zero/adsb_unique_logger.py --data-dir /var/lib/adsb-zero $LOGGER_ARGS
+Restart=always
+RestartSec=5
+# creates /var/lib/adsb-zero (persistent, readable by everyone so rsync works)
+StateDirectory=adsb-zero
+StateDirectoryMode=0755
+UMask=0022
+# creates /run/adsb-zero (tmpfs) for status.json
+RuntimeDirectory=adsb-zero
+RuntimeDirectoryMode=0755
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+# give the final flush time on shutdown
+TimeoutStopSec=20
+
+[Install]
+WantedBy=multi-user.target
